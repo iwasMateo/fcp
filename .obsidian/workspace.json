@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Free Communication protocol.md",
+                "file": "Free Communication Protocol 0.2.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Free Communication protocol"
+              "title": "Free Communication Protocol 0.2"
             }
           }
         ]
@@ -185,7 +185,9 @@
   },
   "active": "b0ae9c7a02831138",
   "lastOpenFiles": [
-    "Free Communication protocol.md",
+    "Free Communication Protocol 0.1.md",
+    "Free Communication Protocol 0.2.md",
+    "fcp.c~",
     "freechat protocol.md"
   ]
 }

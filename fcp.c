@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -14,11 +15,13 @@
 
 // Subtypes for REQUEST
 #define STATUS 1
+#define DATA 2
 
 //Subtypes for RESPONSE
-#define READY 2
-#define BUSY 3
-#define BLOCKED 4
+#define READY 1
+#define BUSY 2
+#define BLOCKED 3
+#define DATA 4
 
 // Protocols
 #define CHAT 1
@@ -30,14 +33,65 @@
 struct request {
   uint8_t request_type;
   uint8_t subtype;
-  uint8_t userlen;
-  char* name;
   uint8_t protocol;
   uint8_t major;
   uint8_t minor;
+  uint8_t userlen;
   uint8_t len;
+  char* name;
   char* payload;
 };
+struct readypackage {
+  uint8_t* composed_request;
+  size_t size;
+};
+
+struct readypackage compose_package(struct request current_req) {
+  uint8_t* thisreq = malloc(current_req.userlen+current_req.len+sizeof(uint8_t)*7);
+  if (thisreq == NULL) {
+    struct readypackage falsepack = {0};
+    return falsepack;
+  }
+  int n = 0;
+  thisreq[n++] = current_req.request_type;
+  thisreq[n++] = current_req.subtype;
+  thisreq[n++] = current_req.userlen;
+  memcpy(current_req.name + n, current_req.name, thisreq[n-1] + 1);
+  n += thisreq[n-1];
+  thisreq[n++] = current_req.protocol;
+  thisreq[n++] = current_req.major;
+  thisreq[n++] = current_req.minor;
+  thisreq[n++] = current_req.len;
+  struct readypackage package;
+  package.composed_request = thisreq;
+  package.size = (size_t) current_req.userlen+1+current_req.len+1+sizeof(uint8_t)*7;
+  return package;
+}
+
+struct request compose_request (uint8_t request_type, uint8_t subtype, uint8_t userlen, char* name, uint8_t protocol, uint8_t majorv, uint8_t minorv, uint8_t len, char* payload) {
+  struct request newreq = {request_type, subtype, userlen, name, protocol, majorv, minorv, len, payload};
+  return newreq;
+}
+
+void user_input_response(int client) {
+  struct request newreq = {0};
+  newreq.request_type = RESPONSE;
+  newreq.subtype = READY;
+  char name[32];
+  scanf("%31s", name);
+  newreq.userlen = (uint8_t) strlen(name);
+  printf("Name is %s and is %d long\n", name, newreq.userlen);
+  newreq.name = name;
+  newreq.protocol = CHAT;
+  newreq.major = (uint8_t) 1;
+  newreq.minor = (uint8_t) 0;
+  char payload[200];
+  scanf("%199s", payload);
+  newreq.len = (uint8_t) strlen(payload);
+  newreq.payload = payload;
+  struct readypackage mypackage = compose_package(newreq);
+  send(client, mypackage.composed_request, mypackage.size, 0);
+}
 
 int main(void) {
   int server = socket(AF_INET6, SOCK_STREAM, 0);
@@ -86,8 +140,7 @@ int main(void) {
       ssize_t n = recv(client, buffer, sizeof(buffer)-1, 0);
 
       if(n > 0) {
-        buffer[n] = '\0';
-        printf("%s\n", buffer);
+        printf("Received %zd bytes\n", n);
       }
 
       int request_constructed = 0;
@@ -96,19 +149,18 @@ int main(void) {
         current_req.request_type = buffer[0];
         current_req.subtype = buffer[1];
         current_req.userlen = buffer[2];
-        char* name = malloc(current_req.userlen+1);
+        char* name = malloc(current_req.userlen);
+        if (name == NULL) return 1;
         memcpy(name, &buffer[3], current_req.userlen);
-        name[current_req.userlen] = '\0';
         current_req.name = name;
         current_req.protocol = buffer[3 + current_req.userlen];
         current_req.major = buffer[3 + current_req.userlen + 1];
         current_req.minor = buffer[3 + current_req.userlen + 2];
         current_req.len = buffer[3 + current_req.userlen + 3];
-        char* payload = malloc(current_req.len+1);
+        char* payload = malloc(current_req.len);
         if (payload == NULL) return 1;
         int payload_offset = 3 + current_req.userlen + 4;
         memcpy(payload, &buffer[payload_offset], current_req.len);
-        payload[current_req.len] = '\0';
         current_req.payload = payload;
       }
       
@@ -136,6 +188,9 @@ int main(void) {
           printf("%u %u %u %s %u %u %u %u %s", (unsigned) current_req.request_type, (unsigned) current_req.subtype, (unsigned) current_req.userlen, current_req.name, (unsigned) current_req.protocol, (unsigned) current_req.major, (unsigned) current_req.minor, (unsigned) current_req.len, current_req.payload);
           free(current_req.name);
           free(current_req.payload);
+          current_req.name = NULL;
+          current_req.payload = NULL;
+          user_input_response(client);
           break;
       }
     }
