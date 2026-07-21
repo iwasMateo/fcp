@@ -63,3 +63,11 @@ Angabe ob ein Erweiterter header vorhanden ist.
 
 #### Bit 7 
 Schon Authentifiziert? Ja/Nein
+
+### Extended headers
+Der Erweiterte Header erlaubt einem Nutzer weiter nötige Informationen weiterzuleiten. 
+Der erweiterte Header besteht aus 10 Bytes.
+#### Bytes 0-7: Peer-ID
+Die Peer-ID ist eine Version des public keys des Peers. Das erfolgt so:
+SHA-256(public key) und davon die ersten 8 Bytes.
+Dieses Verfahren stellt noch keine sichere Verbindung oder Authentifizierung her aber gibt zumindenst einmal eine kleine verifikation. 

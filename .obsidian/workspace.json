@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Free Communication Protocol 0.2.md",
+                "file": "Free Communication Protocol 0.3.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Free Communication Protocol 0.2"
+              "title": "Free Communication Protocol 0.3"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "fc37dc5ceb33a92c",
@@ -185,8 +186,13 @@
   },
   "active": "b0ae9c7a02831138",
   "lastOpenFiles": [
-    "Free Communication Protocol 0.1.md",
+    "Untitled.canvas",
+    "Untitled.base",
+    "Free Communication Protocol 0.3.md",
+    "2026-07-20.md",
+    "fcp0.3.c~",
     "Free Communication Protocol 0.2.md",
+    "Free Communication Protocol 0.1.md",
     "fcp.c~",
     "freechat protocol.md"
   ]
