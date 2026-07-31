@@ -200,16 +200,42 @@ int main(void) {
   }
   int client = -1;
   while (1) {
-    client = accept(server, NULL, NULL);
-    int running = 1;
-    char* response_message = good_input("Enter a Request message: ");
-    send_message(client, REQUEST, READY, response_message);
-    free(response_message);
-    while(running) {
-      get_request_content(client, &running);
-      response_message = good_input("Enter response message: ");
-      send_message(client, RESPONSE, READY, response_message);
+    char input[10];
+     printf("Server (S) or Client (C): ");
+    scanf("%9s", input);
+    if(input[0] == 'C' || input[0] == 'c') {
+      client = accept(server, NULL, NULL);
+      int running = 1;
+      char* response_message = good_input("Enter a Request message: ");
+      send_message(client, REQUEST, READY, response_message);
       free(response_message);
+      while(running) {
+        get_request_content(client, &running);
+        response_message = good_input("Enter response message: ");
+        send_message(client, RESPONSE, READY, response_message);
+        free(response_message);
+      }
+    } else if (input[0] == 'S' || input[0] == 's') {
+      client = socket(AF_INET, SOCK_STREAM, 0);
+      if (client < 0) {
+        perror("Socket");
+        close(client);
+        return EXIT_FAILURE;
+      }
+      if (connect(client, (struct sockaddr *) &address, sizeof(address)) < 0) {
+        perror("connect");
+        close(client);
+        return EXIT_FAILURE;
+      }
+      int running = 1;
+      while(running) {
+        get_request_content(client, &running);
+        char* request_message = good_input("Enter a Request message: ");
+        send_message(client, REQUEST, READY, request_message);
+        free(request_message);
+      }
+    } else {
+      printf("Invalid input. Please enter 'S' for Server or 'C' for Client.\n");
     }
   }
 
