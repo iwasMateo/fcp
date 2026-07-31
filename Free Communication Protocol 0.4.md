@@ -40,6 +40,9 @@ Fragt nach fehlenden Daten innerhalb eines vorherigen Pakets.
 
 Stellt eine Anfrage nach Authentifizierung/Reauthentifizierung. Hierzu später mehr. 
 
+4. EXIT (Wert = 100)
+Eine einfache Anfrage den Chat zu beenden.
+
 Für Response:
 
 1. READY (Wert = 001)
@@ -48,7 +51,7 @@ Der Peer hat eine Verbindung aufgenommen und ist bereit Daten zu empfangen.
 
 2. BUSY (Wert = 010)
 
-Der Peer hat eine Verbindung aufgenommen aber kann im Moment keine Daten empfangen. Versuche erneut in 20 Sekunden.
+Der Peer hat eine Verbindung aufgenommen aber kann im Moment keine Daten empfangen. Versuche erneut in der Zeit die in der Payload angegeben wird (Format ist uint32).
 
 3. BLOCKED (Wert = 011)
 
@@ -58,19 +61,23 @@ Der Peer hat eine Verbindung aufgenommen wird sie aber nach dieser Nachricht wie
 
 Antwort auf eine Request mit dem Typ DATA, enthält im Daten Teil der Nachricht das fehlende Paket nach welchem gefragt wurde.
 
+5. ERROR (Wert = 101)
+Falls es jegliche Fehler der Formatierung vom Header oder extended header gibt, kann man mit Error eine Anfrage die letzte Nachricht zu wiederholen ausstellen.
+
 #### Bit 6
 Angabe ob ein Erweiterter header vorhanden ist.
 
 #### Bit 7 
 Schon Authentifiziert? Ja/Nein
 
-### Der Zweite und Dritte
-Der Zweite und Dritte Byte beinhalten die größe der Payload als unsigned short int beziehungsweise einem 2 Byte großem unsignierten Integer.
+### Der Zweite bis Fünfte Byte
+Der Zweite bis Fünfte Byte beinhalten die größe der Payload als unsigned int beziehungsweise einem 4 Byte großem unsignierten Integer.
 
 ### Extended headers
 Der Erweiterte Header erlaubt einem Nutzer weiter nötige Informationen weiterzuleiten. 
-Der erweiterte Header besteht aus 10 Bytes.
-#### Bytes 0-7: Peer-ID
-Die Peer-ID ist eine Version des public keys des Peers. Das erfolgt so:
-SHA-256(public key) und davon die ersten 8 Bytes.
-Dieses Verfahren stellt noch keine sichere Verbindung oder Authentifizierung her aber gibt zumindenst einmal eine kleine verifikation. 
+Der erweiterte Header besteht aus 4 Bytes eines unsignierten Integers, welcher angibt wie groß der erweiterte Header ist und 32 Bytes des Typs string (nicht null terminiert) um den benutzten standard anzugeben. 
+Danach folgen weitere Daten innerhalb der Payload.
+
+### Die Payload
+In diesem Teil werden jegliche Daten die nicht direkt zum Header oder Extended Header gehören versendet.
+Falls kein Erweiterter Header vorhanden ist, ist das Standard-Format der Payload ein null-terminierter String.
