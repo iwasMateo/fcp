@@ -23,7 +23,7 @@
 #define READY 1
 #define BUSY 2
 #define BLOCKED 3
-#define DATA 4
+#define RESDATA 4
 
 // Protocols
 #define CHAT 1
@@ -80,7 +80,7 @@ struct readypackage compose_package(struct request current_req) {
 }
 
 struct request compose_request (uint8_t request_type, uint8_t subtype, uint8_t userlen, char* name, uint8_t protocol, uint8_t majorv, uint8_t minorv, uint8_t len, char* payload) {
-  struct request newreq = {request_type, subtype, userlen, name, protocol, majorv, minorv, len, payload};
+  struct request newreq = {request_type, subtype, protocol, name, protocol, majorv, minorv, len, payload};
   return newreq;
 }
 

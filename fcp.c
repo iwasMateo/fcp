@@ -67,11 +67,11 @@ struct readypackage compose_package(struct request current_req) {
   package.size = (size_t) current_req.userlen+1+current_req.len+1+sizeof(uint8_t)*7;
   return package;
 }
-
+/* 
 struct request compose_request (uint8_t request_type, uint8_t subtype, uint8_t userlen, char* name, uint8_t protocol, uint8_t majorv, uint8_t minorv, uint8_t len, char* payload) {
   struct request newreq = {request_type, subtype, userlen, name, protocol, majorv, minorv, len, payload};
   return newreq;
-}
+}*/
 
 void user_input_response(int client) {
   struct request newreq = {0};
@@ -108,9 +108,7 @@ int main(void) {
   address.sin6_addr = in6addr_any;
 
   int yes = 1;
-
   setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
-
   if (bind(server, (struct sockaddr *) &address, sizeof(address)) < 0) {
     perror("bind");
     close(server);
@@ -137,7 +135,7 @@ int main(void) {
       }
 
       uint8_t buffer[1024];
-      ssize_t n = recv(client, buffer, sizeof(buffer)-1, 0);
+      ssize_t n = recv(client, buffer, sizeof(buffer), 0);
 
       if(n > 0) {
         printf("Received %zd bytes\n", n);
